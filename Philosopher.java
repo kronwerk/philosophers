@@ -1,15 +1,19 @@
 import java.util.Random;
 
 public class Philosopher {
-    int position;
     int eatCount = 0;
     long waitTime = 0;
     long startWait;
     Random rnd = new Random();
     int maxTimeout = 10;
+    private int position;
 
     public Philosopher(int position) {
         this.position = position;
+    }
+
+    public int getPosition() {
+        return position;
     }
 
     public void eat() {

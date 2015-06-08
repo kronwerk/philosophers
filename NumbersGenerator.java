@@ -1,20 +1,36 @@
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class NumbersGenerator {
-    public static int[] getNumbers(int start, int total) {
-        int N = total / 2;
-        int[] numbers = new int[N];
-        int k = start;
-        for (int i = 0; i < N; i++) {
-            if (k > total)
-                k -= total;
-            if (!(k == total && start == 1))
-                numbers[i] = k;
-            k += 2;
-        }
-        return numbers;
+    private static int pointer = -1;
+    private static Lock lock = new ReentrantLock();
+    public static final int FAIL = -1;
+    private Locks locks;
+
+    public NumbersGenerator(int locksNum) {
+        this.locks = new Locks(locksNum);
     }
 
-    public static void main(String[] args) {
-        for(int i : getNumbers(2, 4))
-            System.out.printf("%d, ", i);
+    public int getLeft(int i) {
+        return locks.getLeft(i);
+    }
+
+    public int getRight(int i) {
+        return locks.getRight(i);
+    }
+
+    public Lock get(int i) {
+        return locks.get(i);
+    }
+
+    public int get() {
+        if (!lock.tryLock())
+            return FAIL;
+        pointer = locks.getRight(pointer);
+        return pointer;
+    }
+
+    public void release() {
+        lock.unlock();
     }
 }

@@ -3,7 +3,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Locks {
     private Lock[] locks;
-    int maxCount;
 
     public Locks(int len) {
         locks = new Lock[len];
@@ -11,17 +10,16 @@ public class Locks {
             locks[i] = new ReentrantLock();
     }
 
-    public Lock right(int position) {
-        int i = (position==locks.length-1) ? 0: position+1;
+    public int getLeft(int i) {
+        return (i==0) ? locks.length-1: i-1;
+    }
+
+    public int getRight(int i) {
+        return (i==locks.length-1) ? 0: i+1;
+    }
+
+    public Lock get(int i) {
         return locks[i];
     }
 
-    public Lock left(int position) {
-        int i = (position==0) ? locks.length-1: position-1;
-        return locks[i];
-    }
-
-    public synchronized void update(int count) {
-        maxCount = (maxCount < count) ? count : maxCount;
-    }
 }

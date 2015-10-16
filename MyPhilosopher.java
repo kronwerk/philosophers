@@ -1,50 +1,45 @@
-import java.util.concurrent.locks.Lock;
-
 public class MyPhilosopher extends Philosopher implements Runnable {
     volatile boolean stopFlag = false;
-    private NumbersGenerator generator;
-    private static int count = 0;
+    private Locks locks;
 
-    public MyPhilosopher(int position, NumbersGenerator generator) {
+    public MyPhilosopher(int position, Locks locks) {
         super(position);
-        this.generator = generator;
+        this.locks = locks;
     }
 
     public void run() {
-        int current = 0;
         while (!stopFlag) {
             think();
-            current = generator.get();
-            if (current == generator.FAIL)
-                continue;
-            if ((generator.getRight(current) == generator.getLeft(getPosition()))
-                || (generator.getLeft(current) == generator.getRight(getPosition()))
-                || (count < eatCount)
-                ) {
-                count = eatCount;
-                generator.release();
-                continue;
-            }
-
-            Lock left = generator.get(generator.getLeft(getPosition()));
-            while (!left.tryLock())
-                Thread.yield();
-            print("[Philosopher " + getPosition() + "] took left fork");
-
-            Lock right = generator.get(generator.getRight(getPosition()));
-            if (!right.tryLock()) {
-                print("[Philosopher " + getPosition() + "] dropped left fork");
-                left.unlock();
-                generator.release();
-                continue;
-            }
-
-            print("[Philosopher " + getPosition() + "] took right fork");
+            locks.get(getPosition());
+            print("[Philosopher " + getPosition() + "] took forks");
             eat();
-            right.unlock();
-            left.unlock();
-            generator.release();
+            locks.drop(getPosition());
+            print("[Philosopher " + getPosition() + "] dropped forks");
         }
         print("[Philosopher " + getPosition() + "] stopped");
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        MyPhilosopher[] phils = new MyPhilosopher[count];
+        Locks locks = new Locks(count);
+        for (int i = 0; i < count; i++)
+            phils[i] = new MyPhilosopher(i, locks);
+
+        Thread[] threads = new Thread[count];
+        for (int i = 0; i < count; i++) {
+            threads[i] = new Thread(phils[i]);
+            threads[i].start();
+        }
+
+        Thread.sleep(DURATION);
+
+        for (MyPhilosopher phil : phils) {
+            phil.stopFlag = true;
+        }
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        finalize(phils);
     }
 }

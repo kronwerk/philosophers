@@ -8,7 +8,7 @@ public class Philosopher {
     int maxTimeout = 10;
     private int position;
     private boolean debug = false;
-    public static final int count = 30;
+    public static final int count = 5;
     public static final int DURATION = 10000;
 
     public Philosopher(int position) {
@@ -24,20 +24,25 @@ public class Philosopher {
     }
 
     public static void finalize(Philosopher[] phils) {
-        int totalWait = 0;
+        long totalWait = 0;
+        long minWait = Long.MAX_VALUE;
+        long maxWait = 0;
         int minEat = Integer.MAX_VALUE;
         int maxEat = 0;
         int sumEat = 0;
         for (Philosopher phil : phils) {
             System.out.println("[Philosopher " + phil.getPosition() + "] ate " +
-                    phil.eatCount + " times and waited " + phil.waitTime + " ns");
+                    phil.eatCount + " times and waited " + phil.waitTime + " ms");
             totalWait += phil.waitTime;
             sumEat += phil.eatCount;
-            minEat = (phil.eatCount < minEat) ? phil.eatCount : minEat;
-            maxEat = (phil.eatCount > maxEat) ? phil.eatCount : maxEat;
+            minEat = Math.min(phil.eatCount, minEat);
+            maxEat = Math.max(phil.eatCount, maxEat);
+            minWait = Math.min(phil.waitTime, minWait);
+            maxWait = Math.max(phil.waitTime, maxWait);
         }
-        System.out.println("Waited " + totalWait + " ns, ate on average " + sumEat/Philosopher.count +
-                " times.\nMin eat count " + minEat + " times, max eat count " + maxEat + " times");
+        System.out.println("Avg: waited " + totalWait/count + " ms, ate " + sumEat/count + " times.");
+        System.out.println("Min: waited " + minWait + " ms, ate " + minEat + " times.");
+        System.out.println("Max: waited " + maxWait + " ms, ate " + maxEat + " times.");
     }
 
     public void print(String s) {
